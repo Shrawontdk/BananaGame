@@ -46,10 +46,6 @@ export class GameStateService {
     console.log('History updated event:', this.historySignal().length, 'entries');
   }
 
-  /**
-   * EVENT-DRIVEN: Reset all game state
-   * Triggered by logout event
-   */
   resetGame(): void {
     this.scoreSignal.set(0);
     this.attemptsSignal.set(0);

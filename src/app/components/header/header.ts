@@ -17,10 +17,7 @@ export class HeaderComponent {
   attempts = this.gameState.attempts;
   accuracy = this.gameState.accuracy;
 
-  /**
-   * EVENT-DRIVEN: Handle logout button click
-   * Triggers multiple state changes across the app
-   */
+
   onLogout(): void {
     this.gameState.resetGame();
     this.authService.logout();

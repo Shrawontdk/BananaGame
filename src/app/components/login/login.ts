@@ -15,10 +15,7 @@ export class Login {
   password = signal<string>('');
   errorMessage = signal<string>('');
 
-  /**
-   * EVENT-DRIVEN: Handle login button click
-   * VIRTUAL IDENTITY: Authenticate user
-   */
+
   onLogin(): void {
     const user = this.username();
     const pass = this.password();
@@ -38,26 +35,18 @@ export class Login {
     }
   }
 
-  /**
-   * EVENT-DRIVEN: Handle Enter key press
-   */
+
   onKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       this.onLogin();
     }
   }
 
-  /**
-   * Update username signal
-   */
   updateUsername(value: string): void {
     this.username.set(value);
     this.errorMessage.set(''); // Clear error when typing
   }
 
-  /**
-   * Update password signal
-   */
   updatePassword(value: string): void {
     this.password.set(value);
     this.errorMessage.set(''); // Clear error when typing
