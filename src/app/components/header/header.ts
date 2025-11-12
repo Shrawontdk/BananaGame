@@ -1,5 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, inject} from '@angular/core';
 import {Auth} from '../../services/auth';
 import {GameStateService} from '../../services/game-state-service';
 
