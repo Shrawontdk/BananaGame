@@ -1,0 +1,11 @@
+{
+  "/api": {
+    "target": "http://marcconrad.com",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": "/uob/banana"
+    },
+    "logLevel": "debug"
+  }
+}

@@ -1,0 +1,43 @@
+<header class="header">
+  <div class="header-content">
+    <div class="header-left">
+      <h1 class="header-title">🍌 Banana Math Game</h1>
+      @if (currentUser()) {
+        <p class="header-subtitle">Welcome, {{ currentUser()?.username }}!</p>
+      }
+    </div>
+
+    <button
+      (click)="onLogout()"
+      class="btn-logout"
+    >
+      Logout
+    </button>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card stat-score">
+      <span class="stat-icon">🏆</span>
+      <div class="stat-content">
+        <span class="stat-label">Score</span>
+        <span class="stat-value">{{ score() }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-attempts">
+      <span class="stat-icon">📝</span>
+      <div class="stat-content">
+        <span class="stat-label">Attempts</span>
+        <span class="stat-value">{{ attempts() }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-accuracy">
+      <span class="stat-icon">🎯</span>
+      <div class="stat-content">
+        <span class="stat-label">Accuracy</span>
+        <span class="stat-value">{{ accuracy() }}%</span>
+      </div>
+    </div>
+  </div>
+</header>

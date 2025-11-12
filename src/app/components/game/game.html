@@ -1,0 +1,137 @@
+<div class="container my-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm p-4 animate-fade-in m-5">
+        @if (!currentQuestion()) {
+          <div class="text-center py-5">
+            <h2 class="fw-bold mb-3 text-dark">Ready to Play?</h2>
+            <p class="text-muted fs-5 mb-4">
+              Click the button below to start solving math puzzles!
+            </p>
+            <button
+              (click)="loadQuestion()"
+              [disabled]="isLoading()"
+              class="btn btn-warning btn-lg px-5"
+            >
+              @if (isLoading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Loading...
+              } @else {
+                ▶️ Start Game
+              }
+            </button>
+          </div>
+        }
+
+        @if (currentQuestion()) {
+          <div class="animate-fade-in">
+            <h3 class="text-center fw-bold mb-4">Solve the Puzzle</h3>
+
+            <!-- Question Image -->
+            <div class="bg-light border rounded-3 p-4 mb-4 d-flex justify-content-center align-items-center">
+              <img
+                [src]="currentQuestion()?.question"
+                alt="Math puzzle"
+                class="img-fluid rounded shadow-sm question-img"
+                style="max-height: 350px;"
+              />
+            </div>
+
+            <!-- Answer Section -->
+            <div>
+              <label for="answer" class="form-label fw-semibold"
+              >What's your answer?</label
+              >
+              <input
+                id="answer"
+                type="number"
+                [value]="userAnswer()"
+                (input)="updateAnswer($any($event.target).value)"
+                (keypress)="onKeyPress($event)"
+                [disabled]="isLoading()"
+                placeholder="Enter a number"
+                class="form-control form-control mb-3"
+                autofocus
+              />
+
+              <div class="d-flex gap-3">
+                <button
+                  (click)="submitAnswer()"
+                  [disabled]="isLoading() || !userAnswer()"
+                  class="btn btn-success flex-fill py-2 fw-semibold"
+                >
+                  Submit Answer
+                </button>
+                <button
+                  (click)="skipQuestion()"
+                  [disabled]="isLoading()"
+                  class="btn btn-secondary flex-fill py-2 fw-semibold"
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
+
+            <!-- Feedback Message -->
+            @if (feedback()) {
+              <div
+                class="alert mt-4 animate-slide"
+                [class]="{
+                  'alert-success': feedbackType() === 'success',
+                  'alert-danger': feedbackType() === 'error'
+                }"
+                role="alert"
+              >
+                @if (feedbackType() === 'success') {
+                  ✅
+                } @else {
+                  ❌
+                }
+                {{ feedback() }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Side: Game History -->
+    <div class="col-lg-4">
+      @if (history().length > 0) {
+        <div class="card shadow-sm p-3 animate-fade-in">
+          <h4 class="fw-bold text-dark mb-3 text-center">Game History</h4>
+          <div class="overflow-auto" style="max-height: 500px;">
+            @for (item of history().slice().reverse(); track item.timestamp) {
+              <div
+                class="border rounded-3 p-3 mb-2 animate-slide"
+                [class]="{
+                  'bg-success-subtle border-success': item.isCorrect,
+                  'bg-danger-subtle border-danger': !item.isCorrect
+                }"
+              >
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="small text-dark">
+                    Your answer:
+                    <strong>{{ item.userAnswer }}</strong>
+                    @if (!item.isCorrect) {
+                      <span class="text-muted">
+                        (Correct: {{ item.correctAnswer }})
+                      </span>
+                    }
+                  </span>
+                  <span class="fs-5">
+                    @if (item.isCorrect) {
+                      ✅
+                    } @else {
+                      ❌
+                    }
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

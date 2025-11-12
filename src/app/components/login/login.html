@@ -1,0 +1,48 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>🍌 Banana Math Game</h1>
+      <p>Solve puzzles and earn points!</p>
+    </div>
+
+    <div class="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          [value]="username()"
+          (input)="updateUsername($any($event.target).value)"
+          (keypress)="onKeyPress($event)"
+          placeholder="Enter username"
+          class="form-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [value]="password()"
+          (input)="updatePassword($any($event.target).value)"
+          (keypress)="onKeyPress($event)"
+          placeholder="Enter password"
+          class="form-input"
+        />
+      </div>
+      <button
+        (click)="onLogin()"
+        class="btn-login"
+      >
+        Login
+      </button>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+    }
+  </div>
+</div>

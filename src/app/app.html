@@ -1,0 +1,10 @@
+<div class="app-container">
+  @if (!currentUser()) {
+    <app-login></app-login>
+  }
+
+  @if (currentUser()) {
+    <app-header></app-header>
+    <app-game></app-game>
+  }
+</div>
