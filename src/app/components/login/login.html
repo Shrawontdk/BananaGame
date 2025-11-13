@@ -2,20 +2,21 @@
   <div class="login-card">
     <div class="login-header">
       <h1>🍌 Banana Math Game</h1>
-      <p>Solve puzzles and earn points!</p>
+      <p>{{ isRegisterMode() ? 'Create your account' : 'Welcome back!' }}</p>
     </div>
 
     <div class="login-form">
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="email">Email</label>
         <input
-          id="username"
-          type="text"
-          [value]="username()"
-          (input)="updateUsername($any($event.target).value)"
+          id="email"
+          type="email"
+          [value]="email()"
+          (input)="updateEmail($any($event.target).value)"
           (keypress)="onKeyPress($event)"
-          placeholder="Enter username"
+          placeholder="Enter your email"
           class="form-input"
+          [disabled]="isLoading()"
         />
       </div>
 
@@ -27,21 +28,41 @@
           [value]="password()"
           (input)="updatePassword($any($event.target).value)"
           (keypress)="onKeyPress($event)"
-          placeholder="Enter password"
+          placeholder="Enter your password"
           class="form-input"
+          [disabled]="isLoading()"
         />
+        @if (isRegisterMode()) {
+          <small class="hint">Minimum 6 characters</small>
+        }
       </div>
+
       <button
-        (click)="onLogin()"
-        class="btn-login"
+        (click)="isRegisterMode() ? onRegister() : onLogin()"
+        class="btn btn-primary"
+        [disabled]="isLoading()"
       >
-        Login
+        {{ isLoading() ? 'Please wait...' : (isRegisterMode() ? 'Register' : 'Login') }}
+      </button>
+
+      <button
+        (click)="toggleMode()"
+        class="btn btn-secondary"
+        [disabled]="isLoading()"
+      >
+        {{ isRegisterMode() ? 'Already have an account? Login' : 'Need an account? Register' }}
       </button>
     </div>
 
     @if (errorMessage()) {
-      <div class="error-message">
-        {{ errorMessage() }}
+      <div class="message error">
+        ❌ {{ errorMessage() }}
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div class="message success">
+        ✅ {{ successMessage() }}
       </div>
     }
   </div>

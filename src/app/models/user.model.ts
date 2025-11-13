@@ -1,5 +1,5 @@
 export interface User {
   username: string;
-  id: number;
+  id: string;
   loginTime: Date;
 }
