@@ -1,43 +1,65 @@
-<header class="header">
-  <div class="header-content">
-    <div class="header-left">
-      <h1 class="header-title">🍌 Banana Math Game</h1>
-      @if (currentUser()) {
-        <p class="header-subtitle">Welcome, {{ currentUser()?.username }}!</p>
-      }
+<header class="game-header">
+  <div class="header-wrapper">
+    <!-- Top Row: Brand and Actions -->
+    <div class="header-top">
+      <div class="brand">
+        <div class="brand-text">
+          <h1>Banana Math Game</h1>
+          <span class="user-tag">{{ currentUser()?.username }}</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        @if (gameState.isLoadingScore()) {
+          <div class="loading-badge">
+            <span class="spinner"></span>
+            <span>Loading...</span>
+          </div>
+        }
+        <button (click)="onReset()" class="btn-icon" title="Reset score">
+          <span>🔄</span>
+        </button>
+        <button (click)="onLogout()" class="btn-icon logout" title="Logout">
+          <span>🚪</span>
+        </button>
+      </div>
     </div>
 
-    <button
-      (click)="onLogout()"
-      class="btn-logout"
-    >
-      Logout
-    </button>
-  </div>
-
-  <div class="stats-container">
-    <div class="stat-card stat-score">
-      <span class="stat-icon">🏆</span>
-      <div class="stat-content">
-        <span class="stat-label">Score</span>
+    <!-- Bottom Row: Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat">
         <span class="stat-value">{{ score() }}</span>
+        <span class="stat-label">Score</span>
       </div>
-    </div>
 
-    <div class="stat-card stat-attempts">
-      <span class="stat-icon">📝</span>
-      <div class="stat-content">
-        <span class="stat-label">Attempts</span>
-        <span class="stat-value">{{ attempts() }}</span>
-      </div>
-    </div>
+      <div class="stat-divider"></div>
 
-    <div class="stat-card stat-accuracy">
-      <span class="stat-icon">🎯</span>
-      <div class="stat-content">
-        <span class="stat-label">Accuracy</span>
-        <span class="stat-value">{{ accuracy() }}%</span>
+      <div class="stat highlight">
+        <span class="stat-value">{{ highScore() }}</span>
+        <span class="stat-label">🏆 Best</span>
       </div>
+
+      <div class="stat-divider"></div>
+
+      <div class="stat">
+        <span class="stat-value">{{ correctAnswers() }}</span>
+        <span class="stat-label">✓ Correct</span>
+      </div>
+
+      <div class="stat-divider"></div>
+
+      <div class="stat">
+        <span class="stat-value">{{ wrongAnswers() }}</span>
+        <span class="stat-label">✗ Wrong</span>
+      </div>
+
+      @if (attempts() > 0) {
+        <div class="stat-divider"></div>
+        <div class="stat accent">
+          <span class="stat-value">{{ ((correctAnswers() / attempts()) * 100).toFixed(0) }}%</span>
+          <span class="stat-label">Accuracy</span>
+        </div>
+      }
     </div>
   </div>
 </header>

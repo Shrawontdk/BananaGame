@@ -21,23 +21,30 @@ export class Auth {
   isLoading = signal<boolean>(false);
   authError = signal<string>('');
 
+  // ADD: Import GameStateService
+  private gameStateService?: any; // We'll inject this after to avoid circular dependency
 
   constructor() {
     onAuthStateChanged(this.firebaseAuth, (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         const user: User = {
           username: firebaseUser.email || 'User',
-          id: firebaseUser.uid, // Firebase UID
+          id: firebaseUser.uid,
           loginTime: new Date()
         };
         this.currentUser.set(user);
         console.log('Firebase auth state: User logged in', user);
+
+        // IMPORTANT: Load user score when logged in
+        // We'll do this in the component instead to avoid circular dependency
       } else {
         this.currentUser.set(null);
         console.log('Firebase auth state: User logged out');
       }
     });
   }
+
+  // ... rest of your existing auth methods (register, login, logout, etc.)
 
   register(email: string, password: string): Observable<any> {
     this.isLoading.set(true);
@@ -60,7 +67,6 @@ export class Auth {
     );
   }
 
-
   login(email: string, password: string): Observable<any> {
     this.isLoading.set(true);
     this.authError.set('');
@@ -82,10 +88,6 @@ export class Auth {
     );
   }
 
-  /**
-   * VIRTUAL IDENTITY: Logout method
-   * Clears user session and triggers state update
-   */
   logout(): Observable<any> {
     this.isLoading.set(true);
     console.log('Logging out user');
@@ -102,6 +104,10 @@ export class Auth {
           throw error;
         })
     );
+  }
+
+  isAuthenticated(): boolean {
+    return this.currentUser() !== null;
   }
 
   private getErrorMessage(errorCode: string): string {
@@ -126,12 +132,4 @@ export class Auth {
         return 'Authentication failed. Please try again.';
     }
   }
-
-  /**
-   * Check if user is authenticated
-   */
-  isAuthenticated(): boolean {
-    return this.currentUser() !== null;
-  }
-
 }

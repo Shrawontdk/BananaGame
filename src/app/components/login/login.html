@@ -1,8 +1,8 @@
 <div class="login-container">
-  <div class="login-card">
+  <div class="login-card" [ngClass]="isRegisterMode() ? 'register-glow' : 'login-glow'">
     <div class="login-header">
       <h1>🍌 Banana Math Game</h1>
-      <p>{{ isRegisterMode() ? 'Create your account' : 'Welcome back!' }}</p>
+      <h5 class="font-monospace"><u><i>{{ isRegisterMode() ? 'Create your account' : 'Welcome back!' }}</i></u></h5>
     </div>
 
     <div class="login-form">
