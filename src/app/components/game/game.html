@@ -1,6 +1,5 @@
 <div class="container my-4">
   <div class="row g-4">
-    <!-- Left Side: Game Area -->
     <div class="col-lg-8">
       <div class="card shadow-sm p-4 animate-fade-in">
         @if (!currentQuestion()) {
@@ -10,7 +9,6 @@
               Click the button below to start solving math puzzles!
             </p>
 
-            <!-- Loading Score Indicator -->
             @if (gameState.isLoadingScore()) {
               <div class="mb-3">
                 <span class="spinner-border spinner-border-sm text-warning me-2"></span>
@@ -47,7 +45,6 @@
               />
             </div>
 
-            <!-- Answer Section -->
             <div>
               <label for="answer" class="form-label fw-semibold fs-5"
               >What's your answer?</label
@@ -82,7 +79,6 @@
               </div>
             </div>
 
-            <!-- Feedback Message -->
             @if (feedback()) {
               <div
                 class="alert mt-4 animate-slide"
@@ -109,7 +105,6 @@
       </div>
     </div>
 
-    <!-- Right Side: Game History -->
     <div class="col-lg-4">
       @if (history().length > 0) {
         <div class="card shadow-sm p-3 animate-fade-in sticky-top" style="top: 20px;">
@@ -150,7 +145,6 @@
             }
           </div>
 
-          <!-- Clear History Button -->
           @if (history().length > 5) {
             <button
               (click)="clearHistory()"

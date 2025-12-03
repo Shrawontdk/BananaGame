@@ -1,4 +1,3 @@
-// INTEROPERABILITY Theme: External API integration
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
@@ -14,7 +13,6 @@ export class BananaApiService {
   private readonly API_URL = '/api/api.php';
 
   getQuestion(format: 'json' | 'csv' = 'json', base64: boolean = false): Observable<BananaApiResponse> {
-    // HTTP parameters for API request
     const params = new HttpParams()
       .set('out', format)
       .set('base64', base64 ? 'yes' : 'no');
