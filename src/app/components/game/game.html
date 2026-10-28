@@ -1,7 +1,7 @@
 <div class="container my-4">
   <div class="row g-4">
     <div class="col-lg-8">
-      <div class="card shadow-sm p-4 animate-fade-in">
+      <div class="card game-glass shadow-sm p-4 animate-fade-in">
         @if (!currentQuestion()) {
           <div class="text-center py-5">
             <h2 class="fw-bold mb-3 text-dark">Ready to Play?</h2>
@@ -11,7 +11,7 @@
 
             @if (gameState.isLoadingScore()) {
               <div class="mb-3">
-                <span class="spinner-border spinner-border-sm text-warning me-2"></span>
+                <span class="loading-orbit me-2" aria-hidden="true"></span>
                 <span class="text-muted">Loading your score...</span>
               </div>
             }
@@ -32,7 +32,7 @@
         }
 
         @if (currentQuestion()) {
-          <div class="animate-fade-in">
+          <div class="question-content animate-fade-in" [class.is-loading]="isLoading()">
             <h3 class="text-center fw-bold mb-4">Solve the Puzzle</h3>
 
             <!-- Question Image -->
@@ -44,6 +44,13 @@
                 style="max-height: 350px; max-width: 100%;"
               />
             </div>
+
+            @if (isLoading()) {
+              <div class="question-loading-glass" role="status" aria-live="polite">
+                <span class="loading-orbit loading-orbit-large" aria-hidden="true"></span>
+                <span>Loading your next puzzle...</span>
+              </div>
+            }
 
             <div>
               <label for="answer" class="form-label fw-semibold fs-5"
@@ -107,7 +114,7 @@
 
     <div class="col-lg-4">
       @if (history().length > 0) {
-        <div class="card shadow-sm p-3 animate-fade-in sticky-top" style="top: 20px;">
+        <div class="card game-glass shadow-sm p-3 animate-fade-in sticky-top" style="top: 20px;">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold text-dark mb-0">Recent History</h4>
             <span class="badge bg-primary rounded-pill">{{ history().length }}</span>
@@ -116,7 +123,7 @@
           <div class="overflow-auto" style="max-height: 500px;">
             @for (item of history().slice().reverse(); track item.timestamp) {
               <div
-                class="border rounded-3 p-3 mb-2 animate-slide"
+                class="history-glass border rounded-3 p-3 mb-2 animate-slide"
                 [class]="{
                   'bg-success-subtle border-success': item.isCorrect,
                   'bg-danger-subtle border-danger': !item.isCorrect
@@ -155,7 +162,7 @@
           }
         </div>
       } @else if (currentQuestion()) {
-        <div class="card shadow-sm p-4 text-center text-muted animate-fade-in">
+        <div class="card game-glass shadow-sm p-4 text-center text-muted animate-fade-in">
           <p class="mb-0">🎯 Your game history will appear here</p>
         </div>
       }

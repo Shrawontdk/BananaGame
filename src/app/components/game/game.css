@@ -81,7 +81,91 @@
 
 .card {
   border: none;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  animation: game-card-arrive 500ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.game-glass {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.54)) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  backdrop-filter: blur(22px) saturate(155%);
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 18px 45px rgba(131, 24, 67, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+}
+
+.game-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+  pointer-events: none;
+}
+
+.history-glass {
+  background: rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
+  backdrop-filter: blur(12px) saturate(145%);
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 14px rgba(131, 24, 67, 0.05);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.history-glass:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 9px 20px rgba(131, 24, 67, 0.1);
+}
+
+.question-content {
+  position: relative;
+  transition: opacity 200ms ease, filter 200ms ease;
+}
+
+.question-content.is-loading {
+  opacity: 0.5;
+  filter: saturate(0.65);
+  pointer-events: none;
+}
+
+.question-loading-glass {
+  position: absolute;
+  z-index: 2;
+  inset: 50% auto auto 50%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  color: #9d174d;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.76);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 14px 40px rgba(131, 24, 67, 0.15), inset 0 1px 0 white;
+  animation: loading-pill-arrive 260ms ease-out both, loading-pill-float 2s ease-in-out 260ms infinite;
+}
+
+.loading-orbit {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  vertical-align: -4px;
+  border: 2px solid rgba(219, 39, 119, 0.2);
+  border-top-color: #db2777;
+  border-right-color: #f472b6;
+  border-radius: 50%;
+  animation: orbit-spin 750ms linear infinite;
+}
+
+.loading-orbit-large {
+  width: 25px;
+  height: 25px;
+  border-width: 3px;
 }
 
 .card:hover {
@@ -116,7 +200,56 @@
 }
 
 .overflow-auto::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #be185d;
+}
+
+.form-control:focus {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 0.25rem rgba(236, 72, 153, 0.2);
+}
+
+.badge.bg-primary {
+  background: linear-gradient(135deg, #f472b6, #db2777) !important;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f9a8d4, #ec4899, #db2777) !important;
+  background-size: 180% 180% !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(219, 39, 119, 0.28);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-position: 100% 50% !important;
+  box-shadow: 0 8px 20px rgba(219, 39, 119, 0.36);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #f472b6, #db2777) !important;
+  box-shadow: 0 4px 14px rgba(219, 39, 119, 0.25);
+}
+
+.btn-success:hover:not(:disabled) {
+  box-shadow: 0 8px 20px rgba(219, 39, 119, 0.35);
+}
+
+.btn-outline-secondary:hover {
+  background: #be185d !important;
+}
+
+@keyframes game-card-arrive {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
+@keyframes loading-pill-arrive {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes loading-pill-float {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, calc(-50% - 3px)); }
 }
 /* ============================
    Modern Button Enhancements

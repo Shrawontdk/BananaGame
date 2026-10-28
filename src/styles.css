@@ -1,4 +1,30 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(ellipse at 8% 12%, rgba(249, 168, 212, 0.18), transparent 34rem),
+    radial-gradient(ellipse at 94% 86%, rgba(236, 72, 153, 0.1), transparent 30rem),
+    #fffafd;
+}
+
+:root {
+  --pink-500: #ec4899;
+  --pink-600: #db2777;
+  --pink-700: #be185d;
+  --pink-soft: #fce7f3;
+  --pink-glow: rgba(236, 72, 153, 0.28);
+}
+
+::selection { background: #f9a8d4; color: #4a044e; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
