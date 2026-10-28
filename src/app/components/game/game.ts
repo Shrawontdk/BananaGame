@@ -148,7 +148,7 @@ export class Game implements OnInit {
    */
   clearHistory(): void {
     if (confirm('Clear all game history?')) {
-      this.gameState.history.set([]);
+      this.gameState.clearHistory();
       console.log('Game history cleared');
     }
   }

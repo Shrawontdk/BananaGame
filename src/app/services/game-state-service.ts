@@ -33,6 +33,11 @@ export class GameStateService {
     this.isLoadingScore.set(true);
     console.log('Loading score for user:', currentUser.id);
 
+    this.scoreService.getUserHistory(currentUser.id).subscribe({
+      next: (history) => this.history.set(history),
+      error: (error) => console.error('Error loading game history:', error)
+    });
+
     this.scoreService.getUserScore(currentUser.id).subscribe({
       next: (userScore) => {
         if (userScore) {
@@ -116,7 +121,23 @@ export class GameStateService {
    * Add game to history
    */
   addToHistory(entry: GameHistory): void {
-    this.history.update(current => [...current, entry]);
+    const updatedHistory = [...this.history(), entry];
+    this.history.set(updatedHistory);
+    this.saveHistory(updatedHistory);
+  }
+
+  clearHistory(): void {
+    this.history.set([]);
+    this.saveHistory([]);
+  }
+
+  private saveHistory(history: GameHistory[]): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) return;
+
+    this.scoreService.saveUserHistory(currentUser.id, history).subscribe({
+      error: (error) => console.error('Error saving game history:', error)
+    });
   }
 
   /**
@@ -144,7 +165,6 @@ export class GameStateService {
     this.attempts.set(0);
     this.correctAnswers.set(0);
     this.wrongAnswers.set(0);
-    this.history.set([]);
     console.log('Local game state reset');
   }
 }

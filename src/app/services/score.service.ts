@@ -1,6 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {doc, Firestore, getDoc, serverTimestamp, setDoc, updateDoc} from '@angular/fire/firestore';
 import {UserScore} from '../models/user-score.model';
+import {GameHistory} from '../models/game-history.model';
 import {from, Observable} from 'rxjs';
 
 @Injectable({
@@ -8,6 +9,25 @@ import {from, Observable} from 'rxjs';
 })
 export class ScoreService {
   private firestore = inject(Firestore);
+
+  /** Load a user's saved game history. */
+  getUserHistory(userId: string): Observable<GameHistory[]> {
+    const userDocRef = doc(this.firestore, `scores/${userId}`);
+    return from(getDoc(userDocRef).then((docSnap) => {
+      if (!docSnap.exists()) return [];
+      const entries = (docSnap.data()['history'] ?? []) as Array<GameHistory & {timestamp: unknown}>;
+      return entries.map((entry) => ({
+        ...entry,
+        timestamp: entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp as string)
+      }));
+    }));
+  }
+
+  /** Persist a user's game history on their score document. */
+  saveUserHistory(userId: string, history: GameHistory[]): Observable<void> {
+    const userDocRef = doc(this.firestore, `scores/${userId}`);
+    return from(updateDoc(userDocRef, {history}));
+  }
 
   /**
    * FIRESTORE: Get user score from database
