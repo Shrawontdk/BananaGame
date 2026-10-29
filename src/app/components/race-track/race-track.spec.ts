@@ -48,6 +48,9 @@ describe('RaceTrack', () => {
     expect(root.textContent).toContain('+4 more');
     expect(root.querySelector('.motion-toggle')).toBeNull();
     expect(getComputedStyle(root.querySelector('.driver')!).transitionDuration).toContain('0.8s');
+    const carAnimation = getComputedStyle(root.querySelector('.driver')!).animationName;
+    expect(carAnimation).toContain('cars-enter-from-left');
+    expect(getComputedStyle(root.querySelector('.driver')!).animationDuration).toBe('0.9s');
     const own = root.querySelector('.driver.you') as HTMLElement;
     const carNodes = Array.from(root.querySelectorAll('.driver'));
     const track = root.querySelector('.track')!;

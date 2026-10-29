@@ -68,7 +68,8 @@ h2 {
 }
 .puzzle-image img {
   width: 100%;
-  height: auto;
+  aspect-ratio: 1.6;
+  object-fit: fill;
   display: block;
 }
 label {
