@@ -1,9 +1,4 @@
-<section
-  class="race-panel"
-  [class.motion-enabled]="motionEnabled()"
-  [class.motion-disabled]="!motionEnabled()"
-  aria-labelledby="race-title"
->
+<section class="race-panel" aria-labelledby="race-title">
   <div class="race-heading">
     <div>
       <p class="eyebrow">LIVE TIMING / OPEN GRID</p>
@@ -16,15 +11,6 @@
   <div class="timing-strip">
     <span>FRONT PACK <b>01 &ndash; 05</b></span
     ><span>RACE TO THE TOP &rarr;</span>
-    <button
-      type="button"
-      class="secondary-button motion-toggle"
-      (click)="toggleMotion()"
-      [attr.aria-pressed]="motionEnabled()"
-      aria-label="Enable race animations"
-    >
-      Animations: {{ motionEnabled() ? 'On' : 'Off' }}
-    </button>
   </div>
   @if (board.loading()) {
     <p role="status" class="notice">Connecting to live timing&hellip;</p>

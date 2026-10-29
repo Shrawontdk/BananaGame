@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { Auth } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { F1Car } from '../f1-car/f1-car';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, F1Car],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

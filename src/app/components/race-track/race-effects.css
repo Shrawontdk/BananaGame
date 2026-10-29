@@ -27,32 +27,22 @@
   clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 80%, 22% 50%);
   opacity: 1;
 }
-/* Only explicit motion opt-in overrides system/global reduced-motion durations. */
-.motion-enabled .driver {
+.race-panel .driver {
   transition:
     transform 800ms cubic-bezier(0.22, 0.8, 0.25, 1),
     opacity 600ms !important;
 }
-.motion-enabled .track {
+.race-panel .track {
   transition: height 400ms ease !important;
 }
-.motion-enabled .boost {
+.race-panel .boost {
   animation: boost 1.8s ease-out !important;
 }
-.motion-enabled .boost::before {
+.race-panel .boost::before {
   animation: boost-glow 1.8s ease-out !important;
 }
-.motion-enabled .slowdown {
+.race-panel .slowdown {
   animation: slowdown 1s ease-out !important;
-}
-.motion-disabled .driver,
-.motion-disabled .track {
-  transition: none !important;
-}
-.motion-disabled .boost,
-.motion-disabled .slowdown,
-.motion-disabled .boost::before {
-  animation: none !important;
 }
 @keyframes boost {
   15%,

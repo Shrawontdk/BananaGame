@@ -27,6 +27,7 @@
   transform: skew(-10deg);
 }
 h1 {
+  font-family: 'Arial Black', Arial, Helvetica, sans-serif;
   font-size: 26px;
   letter-spacing: -1px;
   margin: 0;
@@ -34,6 +35,8 @@ h1 {
 }
 h1 em {
   color: #ff514e;
+  font-style: italic;
+  font-weight: 900;
 }
 .brand p {
   font: 9px monospace;
@@ -51,6 +54,9 @@ h1 em {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Arial Black', Arial, Helvetica, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 .stats-bar {
   border-top: 1px solid #252f40;

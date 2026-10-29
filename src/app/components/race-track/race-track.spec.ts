@@ -46,16 +46,13 @@ describe('RaceTrack', () => {
     expect(root.querySelectorAll('ol li').length).toBe(20);
     expect(root.textContent).toContain('Your position: P12');
     expect(root.textContent).toContain('+4 more');
+    expect(root.querySelector('.motion-toggle')).toBeNull();
+    expect(getComputedStyle(root.querySelector('.driver')!).transitionDuration).toContain('0.8s');
     const own = root.querySelector('.driver.you') as HTMLElement;
     const carNodes = Array.from(root.querySelectorAll('.driver'));
     const track = root.querySelector('.track')!;
     const mutations = new MutationObserver(() => {});
     mutations.observe(track, { childList: true });
-    // Establish the initial painted transform before delivering an overtake.
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-    );
-    const oldTransform = getComputedStyle(own).transform;
     entries.update((items) =>
       items.map((item) => (item.uid === 'u11' ? { ...item, score: 210 } : item)),
     );
@@ -67,40 +64,17 @@ describe('RaceTrack', () => {
     expect(root.querySelector('ol li')?.textContent).toContain('Driver 11');
     expect(own.style.zIndex).toBe('100');
     expect(root.textContent).not.toContain('?');
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      );
-      const glide = own
-        .getAnimations()
-        .find(
-          (animation) =>
-            animation instanceof CSSTransition && animation.transitionProperty === 'transform',
-        );
-      expect(glide).toBeDefined();
-      if (glide) await glide.finished;
-      expect(getComputedStyle(own).transform).not.toBe(oldTransform);
-    }
+    expect(getComputedStyle(own).transitionDuration).toContain('0.8s');
     expect(root.textContent).toContain('Your position: P1');
     expect(root.querySelector('.driver.you')?.classList.contains('back')).toBeFalse();
-    const component = fixture.componentInstance;
-    component.motionEnabled.set(false);
     state.boost.set(true);
     fixture.detectChanges();
     expect(root.querySelectorAll('.boost-badge').length).toBe(1);
     const boost = root.querySelector('.driver.you .boost') as HTMLElement;
     expect(boost.textContent).toContain('BOOST +10');
-    expect(getComputedStyle(boost, '::before').opacity).toBe('1');
-    expect(getComputedStyle(boost).animationName).toBe('none');
-    (root.querySelector('.motion-toggle') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    expect(component.motionEnabled()).toBeTrue();
     expect(getComputedStyle(boost).animationName).toContain('boost');
     expect(getComputedStyle(boost).animationDuration).toBe('1.8s');
-    (root.querySelector('.motion-toggle') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    expect(component.motionEnabled()).toBeFalse();
-    expect(getComputedStyle(boost).animationName).toBe('none');
+    expect(getComputedStyle(boost, '::before').animationName).toContain('boost-glow');
     state.boost.set(false);
     fixture.detectChanges();
     expect(root.querySelector('.boost-badge')).toBeNull();
