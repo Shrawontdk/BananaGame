@@ -210,25 +210,6 @@ h2 {
   margin-left: 12px;
   color: #737f95;
 }
-.boost {
-  animation: boost 1s ease-out;
-}
-.boost::before {
-  content: '';
-  pointer-events: none;
-  opacity: 0;
-  animation: boost-glow 1s ease-out;
-  position: absolute;
-  right: 95%;
-  top: 20px;
-  width: 48px;
-  height: 18px;
-  background: linear-gradient(90deg, transparent, #ecff78);
-  clip-path: polygon(0 50%, 100% 0, 100% 100%);
-}
-.slowdown {
-  animation: slowdown 1s ease-out;
-}
 .notice {
   padding: 12px 24px;
   color: #c1cbdb;
@@ -262,33 +243,6 @@ h2 {
 .outside-car strong {
   color: #e5ff76;
 }
-@keyframes boost {
-  25% {
-    transform: translateX(16px);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-@keyframes boost-glow {
-  0%,
-  100% {
-    opacity: 0;
-  }
-  25% {
-    opacity: 1;
-  }
-}
-@keyframes slowdown {
-  25% {
-    transform: translateX(-10px);
-    opacity: 0.4;
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
 @media (max-width: 575px) {
   .race-heading {
     padding: 18px;
@@ -308,20 +262,5 @@ h2 {
   }
   .outside-car {
     flex-wrap: wrap;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .track,
-  .driver {
-    transition: none;
-  }
-  .driver {
-    will-change: auto;
-  }
-  .boost,
-  .slowdown,
-  .boost::before {
-    animation: none;
   }
 }

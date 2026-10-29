@@ -1,4 +1,9 @@
-<section class="race-panel" aria-labelledby="race-title">
+<section
+  class="race-panel"
+  [class.motion-enabled]="motionEnabled()"
+  [class.motion-disabled]="!motionEnabled()"
+  aria-labelledby="race-title"
+>
   <div class="race-heading">
     <div>
       <p class="eyebrow">LIVE TIMING / OPEN GRID</p>
@@ -11,6 +16,15 @@
   <div class="timing-strip">
     <span>FRONT PACK <b>01 &ndash; 05</b></span
     ><span>RACE TO THE TOP &rarr;</span>
+    <button
+      type="button"
+      class="secondary-button motion-toggle"
+      (click)="toggleMotion()"
+      [attr.aria-pressed]="motionEnabled()"
+      aria-label="Enable race animations"
+    >
+      Animations: {{ motionEnabled() ? 'On' : 'Off' }}
+    </button>
   </div>
   @if (board.loading()) {
     <p role="status" class="notice">Connecting to live timing&hellip;</p>
@@ -60,6 +74,9 @@
             [class.boost]="driver.uid === user()?.id && state.boost()"
             [class.slowdown]="driver.uid === user()?.id && state.slowdown()"
           >
+            @if (driver.uid === user()?.id && state.boost()) {
+              <span class="boost-badge" role="status">BOOST +10</span>
+            }
             <app-f1-car
               [color]="driver.color"
               [label]="driver.displayName"
@@ -84,11 +101,15 @@
     @if (board.more() > 0) {
       <span class="more-chip">+{{ board.more() }} more</span>
     }
+
     <span>Top 20 live &middot; ties: earlier score first</span>
   </div>
   @if (board.outsideField(); as own) {
     <div class="outside-car">
       <div class="car-motion" [class.boost]="state.boost()" [class.slowdown]="state.slowdown()">
+        @if (state.boost()) {
+          <span class="boost-badge" role="status">BOOST +10</span>
+        }
         <app-f1-car
           [color]="color(own.uid)"
           [label]="own.displayName"

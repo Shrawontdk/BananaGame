@@ -1,0 +1,104 @@
+.boost {
+  outline: 2px solid #e5ff76;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.boost-badge {
+  position: absolute;
+  right: 0;
+  top: -5px;
+  z-index: 1;
+  padding: 3px 6px;
+  border-radius: 3px;
+  color: #111720;
+  background: #e5ff76;
+  font: 800 10px monospace;
+  white-space: nowrap;
+}
+.boost::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  right: 98%;
+  top: 26%;
+  width: 65px;
+  height: 45%;
+  background: linear-gradient(90deg, transparent, #ffb347, #e5ff76);
+  clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 80%, 22% 50%);
+  opacity: 1;
+}
+/* Only explicit motion opt-in overrides system/global reduced-motion durations. */
+.motion-enabled .driver {
+  transition:
+    transform 800ms cubic-bezier(0.22, 0.8, 0.25, 1),
+    opacity 600ms !important;
+}
+.motion-enabled .track {
+  transition: height 400ms ease !important;
+}
+.motion-enabled .boost {
+  animation: boost 1.8s ease-out !important;
+}
+.motion-enabled .boost::before {
+  animation: boost-glow 1.8s ease-out !important;
+}
+.motion-enabled .slowdown {
+  animation: slowdown 1s ease-out !important;
+}
+.motion-disabled .driver,
+.motion-disabled .track {
+  transition: none !important;
+}
+.motion-disabled .boost,
+.motion-disabled .slowdown,
+.motion-disabled .boost::before {
+  animation: none !important;
+}
+@keyframes boost {
+  15%,
+  45%,
+  75% {
+    transform: translateX(24px);
+  }
+  30%,
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes boost-glow {
+  0%,
+  30%,
+  60%,
+  100% {
+    opacity: 0.6;
+  }
+  15%,
+  45%,
+  75% {
+    opacity: 1;
+  }
+}
+@keyframes slowdown {
+  25% {
+    transform: translateX(-10px);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .driver,
+  .track {
+    transition: none;
+  }
+  .driver {
+    will-change: auto;
+  }
+  .boost,
+  .slowdown,
+  .boost::before {
+    animation: none;
+  }
+}

@@ -25,13 +25,14 @@ describe('RaceTrack', () => {
       error: signal(''),
       outsideField: signal(null),
     };
+    const state = { boost: signal(false), slowdown: signal(false) };
     await TestBed.configureTestingModule({
       imports: [RaceTrack],
       providers: [
         provideZonelessChangeDetection(),
         { provide: LeaderboardService, useValue: board },
         { provide: Auth, useValue: { currentUser: signal({ id: 'u11' }) } },
-        { provide: GameStateService, useValue: { boost: signal(false), slowdown: signal(false) } },
+        { provide: GameStateService, useValue: state },
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(RaceTrack);
@@ -82,6 +83,27 @@ describe('RaceTrack', () => {
     }
     expect(root.textContent).toContain('Your position: P1');
     expect(root.querySelector('.driver.you')?.classList.contains('back')).toBeFalse();
+    const component = fixture.componentInstance;
+    component.motionEnabled.set(false);
+    state.boost.set(true);
+    fixture.detectChanges();
+    expect(root.querySelectorAll('.boost-badge').length).toBe(1);
+    const boost = root.querySelector('.driver.you .boost') as HTMLElement;
+    expect(boost.textContent).toContain('BOOST +10');
+    expect(getComputedStyle(boost, '::before').opacity).toBe('1');
+    expect(getComputedStyle(boost).animationName).toBe('none');
+    (root.querySelector('.motion-toggle') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.motionEnabled()).toBeTrue();
+    expect(getComputedStyle(boost).animationName).toContain('boost');
+    expect(getComputedStyle(boost).animationDuration).toBe('1.8s');
+    (root.querySelector('.motion-toggle') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.motionEnabled()).toBeFalse();
+    expect(getComputedStyle(boost).animationName).toBe('none');
+    state.boost.set(false);
+    fixture.detectChanges();
+    expect(root.querySelector('.boost-badge')).toBeNull();
     root.style.display = 'block';
     root.style.width = '375px';
     const scroll = root.querySelector('.track-scroll') as HTMLElement;

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { F1Car } from '../f1-car/f1-car';
 import { LeaderboardService } from '../../services/leaderboard.service';
 import { Auth } from '../../services/auth';
@@ -9,13 +9,31 @@ import { driverColor, RankedDriver } from '../../services/race-ranking';
   standalone: true,
   imports: [F1Car],
   templateUrl: './race-track.html',
-  styleUrl: './race-track.css',
+  styleUrls: ['./race-track.css', './race-effects.css'],
 })
 export class RaceTrack {
   board = inject(LeaderboardService);
   state = inject(GameStateService);
   user = inject(Auth).currentUser;
   color = driverColor;
+  motionEnabled = signal(false);
+  private motionOverride = false;
+  constructor() {
+    const destroy = inject(DestroyRef);
+    afterNextRender(() => {
+      const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const sync = () => {
+        if (!this.motionOverride) this.motionEnabled.set(!preference.matches);
+      };
+      sync();
+      preference.addEventListener('change', sync);
+      destroy.onDestroy(() => preference.removeEventListener('change', sync));
+    });
+  }
+  toggleMotion(): void {
+    this.motionOverride = true;
+    this.motionEnabled.update((enabled) => !enabled);
+  }
   // Keep DOM siblings in uid order; only their transform and stacking order follow rank.
   cars = computed(() => [...this.board.drivers()].sort((a, b) => a.uid.localeCompare(b.uid)));
   height = computed(() => 660 + Math.ceil(this.board.field().back.length / 3) * 100);
