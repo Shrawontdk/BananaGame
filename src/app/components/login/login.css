@@ -61,12 +61,12 @@
 }
 .car-one {
   top: 53%;
-  left: 25%;
+  left: 22%;
   transform: translate(-50%, -50%) rotate(-56deg);
 }
 .car-two {
   top: 47%;
-  right: 25%;
+  right: 22%;
   transform: translate(50%, -50%) rotate(124deg);
 }
 .car-three {
