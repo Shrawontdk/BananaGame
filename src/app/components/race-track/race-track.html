@@ -1,0 +1,125 @@
+<section class="race-panel" aria-labelledby="race-title">
+  <div class="race-heading">
+    <div>
+      <p class="eyebrow">LIVE TIMING / OPEN GRID</p>
+      <h2 id="race-title">The race is on<span class="red-dot" aria-hidden="true"></span></h2>
+    </div>
+    <div class="start-lights" aria-label="Race in progress">
+      <i></i><i></i><i></i><i></i><i></i>
+    </div>
+  </div>
+  <div class="timing-strip">
+    <span>FRONT PACK <b>01 &ndash; 05</b></span
+    ><span>RACE TO THE TOP &rarr;</span>
+  </div>
+  @if (board.loading()) {
+    <p role="status" class="notice">Connecting to live timing&hellip;</p>
+  }
+  @if (board.error()) {
+    <p role="alert" class="notice error">{{ board.error() }}</p>
+  }
+  @if (!board.loading() && !board.error() && !board.drivers().length) {
+    <p class="notice">Preparing the grid. Drivers join when they sign in.</p>
+  }
+  <div
+    class="track-scroll"
+    tabindex="0"
+    role="region"
+    aria-label="Race track. Scroll horizontally on small screens."
+  >
+    <div class="track" [style.height.px]="height()">
+      <div class="finish-line" aria-hidden="true"></div>
+      <span class="finish-label" aria-hidden="true">FINISH</span>
+      @for (lane of [0, 1, 2, 3, 4]; track lane) {
+        <div class="lane" [style.top.px]="lane * 120"></div>
+      }
+      <div class="back-heading">BACK PACK <span>06 &ndash; 20</span></div>
+      @for (driver of cars(); track driver.uid) {
+        <div
+          class="driver"
+          [style.z-index]="driver.uid === user()?.id ? 100 : 21 - driver.rank"
+          [class.back]="driver.rank > 5"
+          [class.you]="driver.uid === user()?.id"
+          [style.transform]="'translate(' + x(driver) + 'px,' + y(driver) + 'px)'"
+        >
+          <div class="driver-label">
+            <span
+              class="position"
+              [class.gold]="driver.rank === 1"
+              [class.silver]="driver.rank === 2"
+              [class.bronze]="driver.rank === 3"
+              >P{{ driver.rank }}</span
+            >
+            <span class="name" [title]="driver.displayName">{{ driver.displayName }}</span>
+            @if (driver.uid === user()?.id) {
+              <strong class="you-tag">YOU</strong>
+            }
+          </div>
+          <div
+            class="car-motion"
+            [class.boost]="driver.uid === user()?.id && state.boost()"
+            [class.slowdown]="driver.uid === user()?.id && state.slowdown()"
+          >
+            @if (driver.uid === user()?.id && state.boost()) {
+              <span class="boost-badge" role="status">BOOST +10</span>
+            }
+            <app-f1-car
+              [color]="driver.color"
+              [label]="driver.displayName"
+              [rank]="driver.rank"
+              [scale]="driver.rank > 5 ? 0.7 : 1"
+            />
+          </div>
+          <span class="points">{{ driver.score }} <small>PTS</small></span>
+          <span class="gap">{{
+            driver.rank === 1 ? 'LEADER' : '+' + driver.gap + ' pts to P' + (driver.rank - 1)
+          }}</span>
+        </div>
+      }
+    </div>
+  </div>
+  <div class="race-footer" aria-live="polite">
+    @if (board.field().currentPosition; as position) {
+      <span class="your-position"
+        >Your position: <b>P{{ position }}</b></span
+      >
+    }
+    @if (board.more() > 0) {
+      <span class="more-chip">+{{ board.more() }} more</span>
+    }
+
+    <span>Top 20 live &middot; ties: earlier score first</span>
+  </div>
+  @if (board.outsideField(); as own) {
+    <div class="outside-car">
+      <div class="car-motion" [class.boost]="state.boost()" [class.slowdown]="state.slowdown()">
+        @if (state.boost()) {
+          <span class="boost-badge" role="status">BOOST +10</span>
+        }
+        <app-f1-car
+          [color]="color(own.uid)"
+          [label]="own.displayName"
+          [rank]="null"
+          [scale]="0.7"
+        />
+      </div>
+      <span
+        ><strong>YOU &middot; {{ own.displayName }}</strong
+        ><br />Your position: outside the displayed top 20 &middot; {{ own.score }} pts</span
+      >
+    </div>
+  }
+  <ol class="visually-hidden" aria-label="Race order in the displayed top 20">
+    @for (driver of board.drivers(); track driver.uid) {
+      <li>
+        P{{ driver.rank }}: {{ driver.displayName }}, {{ driver.score }} points.
+        @if (driver.uid === user()?.id) {
+          Your car.
+        }
+        @if (driver.rank > 1) {
+          {{ driver.gap }} points behind the car ahead.
+        }
+      </li>
+    }
+  </ol>
+</section>

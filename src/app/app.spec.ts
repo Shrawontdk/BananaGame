@@ -1,25 +1,19 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
-
+import { Auth } from './services/auth';
 describe('App', () => {
-  beforeEach(async () => {
+  it('shows the Banana GP login before authentication', async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideZonelessChangeDetection()]
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: Auth, useValue: { currentUser: signal(null), isLoading: signal(false) } },
+      ],
     }).compileComponents();
-  });
-
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, banana-game');
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Banana GP');
+    expect(fixture.nativeElement.querySelector('app-race-track')).toBeNull();
   });
 });

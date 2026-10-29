@@ -1,170 +1,112 @@
-import {inject, Injectable, signal} from '@angular/core';
-import {GameHistory} from '../models/game-history.model';
-import {ScoreService} from './score.service';
-import {Auth} from './auth';
-
-@Injectable({
-  providedIn: 'root'
-})
+import { inject, Injectable, signal } from '@angular/core';
+import { GameHistory } from '../models/game-history.model';
+import { ScoreService } from './score.service';
+import { Auth } from './auth';
+import { firstValueFrom } from 'rxjs';
+@Injectable({ providedIn: 'root' })
 export class GameStateService {
-  private scoreService = inject(ScoreService);
-  private authService = inject(Auth);
-
-  // EVENT-DRIVEN: Signals for reactive state
-  score = signal<number>(0);
-  highScore = signal<number>(0);
-  attempts = signal<number>(0);
-  correctAnswers = signal<number>(0);
-  wrongAnswers = signal<number>(0);
+  private scores = inject(ScoreService);
+  private auth = inject(Auth);
+  score = signal(0);
+  highScore = signal(0);
+  attempts = signal(0);
+  correctAnswers = signal(0);
+  wrongAnswers = signal(0);
   history = signal<GameHistory[]>([]);
-  isLoadingScore = signal<boolean>(false);
-
-  /**
-   * Load user score from Firestore
-   */
-  loadUserScore(): void {
-    const currentUser = this.authService.currentUser();
-
-    if (!currentUser) {
-      console.log('No user logged in, cannot load score');
-      return;
-    }
-
+  isLoadingScore = signal(false);
+  saving = signal(false);
+  error = signal('');
+  boost = signal(false);
+  slowdown = signal(false);
+  async loadUserScore(): Promise<void> {
+    const user = this.auth.currentUser();
+    if (!user) return;
+    this.clearSession();
     this.isLoadingScore.set(true);
-    console.log('Loading score for user:', currentUser.id);
-
-    this.scoreService.getUserHistory(currentUser.id).subscribe({
-      next: (history) => this.history.set(history),
-      error: (error) => console.error('Error loading game history:', error)
-    });
-
-    this.scoreService.getUserScore(currentUser.id).subscribe({
-      next: (userScore) => {
-        if (userScore) {
-          // Score exists, load it
-          this.score.set(userScore.score);
-          this.highScore.set(userScore.highScore);
-          this.attempts.set(userScore.attempts);
-          this.correctAnswers.set(userScore.correctAnswers);
-          this.wrongAnswers.set(userScore.wrongAnswers);
-          console.log('Score loaded from Firestore:', userScore);
-        } else {
-          // First time user, initialize
-          this.scoreService.initializeUserScore(
-            currentUser.id,
-            currentUser.username
-          ).subscribe({
-            next: () => {
-              console.log('New user score initialized');
-              this.resetLocalState();
-            },
-            error: (error) => {
-              console.error('Error initializing score:', error);
-            }
-          });
-        }
-        this.isLoadingScore.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading score:', error);
-        this.isLoadingScore.set(false);
+    try {
+      await firstValueFrom(this.scores.initializeUserScore(user.id, user.username));
+      const [score, history] = await Promise.all([
+        firstValueFrom(this.scores.getUserScore(user.id)),
+        firstValueFrom(this.scores.getUserHistory(user.id)),
+      ]);
+      if (this.auth.currentUser()?.id !== user.id) return;
+      if (score) {
+        this.score.set(score.score);
+        this.highScore.set(score.highScore);
+        this.attempts.set(score.attempts);
+        this.correctAnswers.set(score.correctAnswers);
+        this.wrongAnswers.set(score.wrongAnswers);
       }
-    });
-  }
-
-  /**
-   * EVENT: Correct answer - increment score
-   */
-  incrementScore(points: number = 10): void {
-    const currentUser = this.authService.currentUser();
-    if (!currentUser) return;
-
-    const newScore = this.score() + points;
-    this.score.set(newScore);
-    this.attempts.update(v => v + 1);
-    this.correctAnswers.update(v => v + 1);
-
-    // Update high score locally if needed
-    if (newScore > this.highScore()) {
-      this.highScore.set(newScore);
+      this.history.set(history);
+    } catch {
+      if (this.auth.currentUser()?.id === user.id)
+        this.error.set('Could not load your score. Sign out and try again.');
+    } finally {
+      if (this.auth.currentUser()?.id === user.id) this.isLoadingScore.set(false);
     }
-
-    // FIRESTORE: Save to database
-    this.scoreService.incrementScore(currentUser.id, this.score() - points, points)
-      .subscribe({
-        next: () => console.log('Score saved to Firestore'),
-        error: (error) => console.error('Error saving score:', error)
-      });
   }
-
-  /**
-   * EVENT: Wrong answer - decrement score
-   */
-  decrementScore(points: number = 5): void {
-    const currentUser = this.authService.currentUser();
-    if (!currentUser) return;
-
-    const newScore = Math.max(0, this.score() - points);
-    this.score.set(newScore);
-    this.attempts.update(v => v + 1);
-    this.wrongAnswers.update(v => v + 1);
-
-    // FIRESTORE: Save to database
-    this.scoreService.decrementScore(currentUser.id, this.score() + points, points)
-      .subscribe({
-        next: () => console.log('Score saved to Firestore'),
-        error: (error) => console.error('Error saving score:', error)
-      });
+  async recordAnswer(correct: boolean, entry: GameHistory): Promise<boolean> {
+    const user = this.auth.currentUser();
+    if (!user || this.saving() || this.isLoadingScore() || this.error()) return false;
+    this.saving.set(true);
+    try {
+      await firstValueFrom(
+        correct
+          ? this.scores.incrementScore(user.id, this.score())
+          : this.scores.decrementScore(user.id, this.score()),
+      );
+      if (this.auth.currentUser()?.id !== user.id) return false;
+      this.score.update((v) => (correct ? v + 10 : Math.max(0, v - 5)));
+      this.highScore.update((v) => Math.max(v, this.score()));
+      this.attempts.update((v) => v + 1);
+      (correct ? this.correctAnswers : this.wrongAnswers).update((v) => v + 1);
+      (correct ? this.boost : this.slowdown).set(true);
+      const history = [...this.history(), entry];
+      this.history.set(history);
+      try {
+        await firstValueFrom(this.scores.saveUserHistory(user.id, history));
+      } catch {
+        this.error.set('Points saved, but history could not be saved. Sign in again to reload.');
+      }
+      return true;
+    } catch {
+      this.error.set('Could not save your answer. Sign in again to reload your score.');
+      return false;
+    } finally {
+      this.saving.set(false);
+    }
   }
-
-  /**
-   * Add game to history
-   */
-  addToHistory(entry: GameHistory): void {
-    const updatedHistory = [...this.history(), entry];
-    this.history.set(updatedHistory);
-    this.saveHistory(updatedHistory);
-  }
-
   clearHistory(): void {
-    this.history.set([]);
-    this.saveHistory([]);
-  }
-
-  private saveHistory(history: GameHistory[]): void {
-    const currentUser = this.authService.currentUser();
-    if (!currentUser) return;
-
-    this.scoreService.saveUserHistory(currentUser.id, history).subscribe({
-      error: (error) => console.error('Error saving game history:', error)
+    const user = this.auth.currentUser();
+    if (!user) return;
+    this.scores.saveUserHistory(user.id, []).subscribe({
+      next: () => this.history.set([]),
+      error: () => this.error.set('Could not clear history.'),
     });
   }
-
-  /**
-   * Reset game (logout or manual reset)
-   */
-  resetGame(): void {
-    const currentUser = this.authService.currentUser();
-
-    if (currentUser) {
-      // FIRESTORE: Reset score in database (keeps high score)
-      this.scoreService.resetScore(currentUser.id).subscribe({
-        next: () => console.log('Score reset in Firestore'),
-        error: (error) => console.error('Error resetting score:', error)
-      });
+  async resetGame(): Promise<void> {
+    const user = this.auth.currentUser();
+    if (!user || this.saving() || this.isLoadingScore() || this.error()) return;
+    this.saving.set(true);
+    try {
+      await firstValueFrom(this.scores.resetScore(user.id));
+      if (this.auth.currentUser()?.id === user.id) this.score.set(0);
+    } catch {
+      this.error.set('Could not reset your score.');
+    } finally {
+      this.saving.set(false);
     }
-
-    this.resetLocalState();
   }
-
-  /**
-   * Reset local state
-   */
-  private resetLocalState(): void {
+  clearSession(): void {
     this.score.set(0);
+    this.highScore.set(0);
     this.attempts.set(0);
     this.correctAnswers.set(0);
     this.wrongAnswers.set(0);
-    console.log('Local game state reset');
+    this.history.set([]);
+    this.error.set('');
+    this.boost.set(false);
+    this.slowdown.set(false);
+    this.isLoadingScore.set(false);
   }
 }

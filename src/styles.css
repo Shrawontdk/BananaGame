@@ -1,30 +1,79 @@
-/* You can add global styles to this file, and also import other style files */
-
-html, body { height: 100%; }
+html,
 body {
+  min-height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background:
-    radial-gradient(ellipse at 8% 12%, rgba(249, 168, 212, 0.18), transparent 34rem),
-    radial-gradient(ellipse at 94% 86%, rgba(236, 72, 153, 0.1), transparent 30rem),
-    #fffafd;
 }
-
-:root {
-  --pink-500: #ec4899;
-  --pink-600: #db2777;
-  --pink-700: #be185d;
-  --pink-soft: #fce7f3;
-  --pink-glow: rgba(236, 72, 153, 0.28);
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0b1019;
+  color: #f0f3fa;
+  color-scheme: dark;
 }
-
-::selection { background: #f9a8d4; color: #4a044e; }
-
+* {
+  box-sizing: border-box;
+}
+button,
+input,
+summary {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.primary-button,
+.secondary-button {
+  border-radius: 5px;
+  padding: 11px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 42px;
+}
+.primary-button {
+  background: #e5ff76;
+  border: 1px solid #e5ff76;
+  color: #111720;
+}
+.primary-button:hover:not(:disabled) {
+  background: #f0ffa9;
+}
+.secondary-button {
+  background: #202938;
+  border: 1px solid #44516a;
+  color: #e9edf5;
+}
+.secondary-button:hover:not(:disabled) {
+  background: #303d52;
+}
+:focus-visible {
+  outline: 3px solid #e5ff76 !important;
+  outline-offset: 4px;
+}
+::selection {
+  background: #e5ff76;
+  color: #111720;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

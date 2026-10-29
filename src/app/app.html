@@ -1,10 +1,9 @@
-<div class="app-container">
-  @if (!currentUser()) {
-    <app-login></app-login>
-  }
-
-  @if (currentUser()) {
-    <app-header></app-header>
-    <app-game></app-game>
-  }
-</div>
+@if (currentUser()) {
+  <app-header />
+  <main class="race-layout"><app-race-track /><app-game /></main>
+  <footer class="page-footer">
+    BANANA GP <span>Every challenge is a chance to overtake.</span>
+  </footer>
+} @else {
+  <app-login />
+}

@@ -1,207 +1,108 @@
-import {inject, Injectable} from '@angular/core';
-import {doc, Firestore, getDoc, serverTimestamp, setDoc, updateDoc} from '@angular/fire/firestore';
-import {UserScore} from '../models/user-score.model';
-import {GameHistory} from '../models/game-history.model';
-import {from, Observable} from 'rxjs';
-
-@Injectable({
-  providedIn: 'root'
-})
+import { inject, Injectable } from '@angular/core';
+import {
+  doc,
+  Firestore,
+  getDoc,
+  runTransaction,
+  serverTimestamp,
+  updateDoc,
+} from '@angular/fire/firestore';
+import { UserScore } from '../models/user-score.model';
+import { GameHistory } from '../models/game-history.model';
+import { defer, Observable } from 'rxjs';
+@Injectable({ providedIn: 'root' })
 export class ScoreService {
   private firestore = inject(Firestore);
-
-  /** Load a user's saved game history. */
-  getUserHistory(userId: string): Observable<GameHistory[]> {
-    const userDocRef = doc(this.firestore, `scores/${userId}`);
-    return from(getDoc(userDocRef).then((docSnap) => {
-      if (!docSnap.exists()) return [];
-      const entries = (docSnap.data()['history'] ?? []) as Array<GameHistory & {timestamp: unknown}>;
-      return entries.map((entry) => ({
+  getUserHistory(uid: string): Observable<GameHistory[]> {
+    return defer(async () => {
+      const snapshot = await getDoc(doc(this.firestore, 'scores/' + uid));
+      return (snapshot.data()?.['history'] ?? []).map((entry: any) => ({
         ...entry,
-        timestamp: entry.timestamp instanceof Date ? entry.timestamp : new Date(entry.timestamp as string)
+        timestamp: entry.timestamp?.toDate?.() ?? new Date(entry.timestamp),
       }));
-    }));
+    });
   }
-
-  /** Persist a user's game history on their score document. */
-  saveUserHistory(userId: string, history: GameHistory[]): Observable<void> {
-    const userDocRef = doc(this.firestore, `scores/${userId}`);
-    return from(updateDoc(userDocRef, {history}));
+  saveUserHistory(uid: string, history: GameHistory[]): Observable<void> {
+    return defer(() => updateDoc(doc(this.firestore, 'scores/' + uid), { history }));
   }
-
-  /**
-   * FIRESTORE: Get user score from database
-   */
-  getUserScore(userId: string): Observable<UserScore | null> {
-    console.log('Fetching score for user:', userId);
-
-    const userDocRef = doc(this.firestore, `scores/${userId}`);
-
-    return from(
-      getDoc(userDocRef).then((docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data() as UserScore;
-          console.log('Score retrieved:', data);
-          return {
+  getUserScore(uid: string): Observable<UserScore | null> {
+    return defer(async () => {
+      const snapshot = await getDoc(doc(this.firestore, 'scores/' + uid));
+      return snapshot.exists() ? (snapshot.data() as UserScore) : null;
+    });
+  }
+  // Upsert on login also migrates existing users without resetting their score.
+  initializeUserScore(uid: string, email: string): Observable<void> {
+    return defer(() =>
+      runTransaction(this.firestore, async (transaction) => {
+        const privateRef = doc(this.firestore, 'scores/' + uid);
+        const publicRef = doc(this.firestore, 'leaderboard/' + uid);
+        const snapshot = await transaction.get(privateRef);
+        const publicSnapshot = await transaction.get(publicRef);
+        const data = snapshot.exists()
+          ? (snapshot.data() as UserScore)
+          : {
+              userId: uid,
+              email,
+              score: 0,
+              highScore: 0,
+              attempts: 0,
+              correctAnswers: 0,
+              wrongAnswers: 0,
+            };
+        if (!snapshot.exists())
+          transaction.set(privateRef, {
             ...data,
-            lastPlayed: data.lastPlayed ? new Date(data.lastPlayed) : new Date(),
-            createdAt: data.createdAt ? new Date(data.createdAt) : new Date()
-          };
-        } else {
-          console.log('No score data found for user');
-          return null;
-        }
-      }).catch((error) => {
-        console.error('Error fetching score:', error);
-        return null;
-      })
-    );
-  }
-
-  /**
-   * FIRESTORE: Initialize new user score
-   */
-  initializeUserScore(userId: string, email: string): Observable<void> {
-    console.log('Initializing score for new user:', userId);
-
-    const userDocRef = doc(this.firestore, `scores/${userId}`);
-
-    const initialScore: UserScore = {
-      userId: userId,
-      email: email,
-      score: 0,
-      highScore: 0,
-      attempts: 0,
-      correctAnswers: 0,
-      wrongAnswers: 0,
-      lastPlayed: new Date(),
-      createdAt: new Date()
-    };
-
-    return from(
-      setDoc(userDocRef, {
-        ...initialScore,
-        lastPlayed: serverTimestamp(),
-        createdAt: serverTimestamp()
-      }).then(() => {
-        console.log('User score initialized');
-      }).catch((error) => {
-        console.error('Error initializing score:', error);
-        throw error;
-      })
-    );
-  }
-
-  /**
-   * FIRESTORE: Update user score after game action
-   */
-  updateUserScore(
-    userId: string,
-    updates: Partial<UserScore>
-  ): Observable<void> {
-    console.log('Updating score for user:', userId, updates);
-
-    const userDocRef = doc(this.firestore, `scores/${userId}`);
-
-    return from(
-      updateDoc(userDocRef, {
-        ...updates,
-        lastPlayed: serverTimestamp()
-      }).then(() => {
-        console.log('Score updated successfully');
-      }).catch((error) => {
-        console.error('Error updating score:', error);
-        throw error;
-      })
-    );
-  }
-
-  /**
-   * FIRESTORE: Increment score (correct answer)
-   */
-  incrementScore(
-    userId: string,
-    currentScore: number,
-    points: number = 10
-  ): Observable<void> {
-    const newScore = currentScore + points;
-
-    return from(
-      getDoc(doc(this.firestore, `scores/${userId}`)).then((docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data() as UserScore;
-          const newHighScore = Math.max(data.highScore || 0, newScore);
-
-          return updateDoc(doc(this.firestore, `scores/${userId}`), {
-            score: newScore,
-            highScore: newHighScore,
-            attempts: (data.attempts || 0) + 1,
-            correctAnswers: (data.correctAnswers || 0) + 1,
-            lastPlayed: serverTimestamp()
+            createdAt: serverTimestamp(),
+            lastPlayed: serverTimestamp(),
+            history: [],
           });
-        } else {
-          throw new Error('User score document does not exist');
-        }
-      }).then(() => {
-        console.log('Score incremented:', newScore);
-      }).catch((error) => {
-        console.error('Error incrementing score:', error);
-        throw error;
-      })
+        transaction.set(publicRef, {
+          displayName: email.split('@')[0] || 'Driver',
+          score: data.score,
+          highScore: data.highScore,
+          updatedAt: publicSnapshot.data()?.['updatedAt'] ?? serverTimestamp(),
+        });
+      }),
     );
   }
-
-  /**
-   * FIRESTORE: Decrement score (wrong answer)
-   */
-  decrementScore(
-    userId: string,
-    currentScore: number,
-    points: number = 5
-  ): Observable<void> {
-    const newScore = Math.max(0, currentScore - points);
-
-    return from(
-      getDoc(doc(this.firestore, `scores/${userId}`)).then((docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data() as UserScore;
-
-          return updateDoc(doc(this.firestore, `scores/${userId}`), {
-            score: newScore,
-            attempts: (data.attempts || 0) + 1,
-            wrongAnswers: (data.wrongAnswers || 0) + 1,
-            lastPlayed: serverTimestamp()
-          });
-        } else {
-          throw new Error('User score document does not exist');
-        }
-      }).then(() => {
-        console.log('Score decremented:', newScore);
-      }).catch((error) => {
-        console.error('Error decrementing score:', error);
-        throw error;
-      })
+  private changeScore(uid: string, delta: number | null): Observable<void> {
+    return defer(() =>
+      runTransaction(this.firestore, async (transaction) => {
+        const privateRef = doc(this.firestore, 'scores/' + uid);
+        const snapshot = await transaction.get(privateRef);
+        if (!snapshot.exists()) throw new Error('Your score is not ready. Please sign in again.');
+        const data = snapshot.data() as UserScore;
+        const score = delta === null ? 0 : Math.max(0, data.score + delta);
+        const highScore = Math.max(data.highScore, score);
+        transaction.update(privateRef, {
+          score,
+          highScore,
+          lastPlayed: serverTimestamp(),
+          ...(delta === null
+            ? {}
+            : {
+                attempts: data.attempts + 1,
+                correctAnswers: data.correctAnswers + (delta > 0 ? 1 : 0),
+                wrongAnswers: data.wrongAnswers + (delta < 0 ? 1 : 0),
+              }),
+        });
+        transaction.set(doc(this.firestore, 'leaderboard/' + uid), {
+          displayName: data.email.split('@')[0] || 'Driver',
+          score,
+          highScore,
+          updatedAt: serverTimestamp(),
+        });
+      }),
     );
   }
-
-  /**
-   * FIRESTORE: Reset current score (keep high score)
-   */
-  resetScore(userId: string): Observable<void> {
-    console.log('Resetting score for user:', userId);
-
-    const userDocRef = doc(this.firestore, `scores/${userId}`);
-
-    return from(
-      updateDoc(userDocRef, {
-        score: 0,
-        lastPlayed: serverTimestamp()
-      }).then(() => {
-        console.log('Score reset to 0');
-      }).catch((error) => {
-        console.error('Error resetting score:', error);
-        throw error;
-      })
-    );
+  incrementScore(uid: string, _currentScore: number, points = 10): Observable<void> {
+    return this.changeScore(uid, points);
+  }
+  decrementScore(uid: string, _currentScore: number, points = 5): Observable<void> {
+    return this.changeScore(uid, -points);
+  }
+  resetScore(uid: string): Observable<void> {
+    return this.changeScore(uid, null);
   }
 }

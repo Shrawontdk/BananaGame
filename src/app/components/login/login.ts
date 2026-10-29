@@ -1,11 +1,12 @@
-import {Component, inject, signal} from '@angular/core';
-import {Auth} from '../../services/auth';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { Auth } from '../../services/auth';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { F1Car } from '../f1-car/f1-car';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, F1Car],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -17,7 +18,6 @@ export class Login {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
   isRegisterMode = signal<boolean>(false); // Toggle between login/register
-
 
   onLogin(): void {
     const emailValue = this.email();
@@ -46,7 +46,7 @@ export class Login {
       error: (error) => {
         this.errorMessage.set(this.authService.authError());
         console.error('Login failed:', error);
-      }
+      },
     });
   }
 
@@ -82,16 +82,15 @@ export class Login {
       error: (error) => {
         this.errorMessage.set(this.authService.authError());
         console.error('Registration failed:', error);
-      }
+      },
     });
   }
 
   toggleMode(): void {
-    this.isRegisterMode.update(mode => !mode);
+    this.isRegisterMode.update((mode) => !mode);
     this.errorMessage.set('');
     this.successMessage.set('');
   }
-
 
   onKeyPress(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
