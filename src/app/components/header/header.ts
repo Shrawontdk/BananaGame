@@ -1,46 +1,27 @@
-import {Component, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Auth} from '../../services/auth';
-import {GameStateService} from '../../services/game-state-service';
-
+import { Component, computed, inject, signal } from '@angular/core';
+import { Auth } from '../../services/auth';
+import { GameStateService } from '../../services/game-state-service';
 @Component({
   selector: 'app-header',
-  imports: [CommonModule],
+  standalone: true,
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
 export class HeaderComponent {
-  private authService = inject(Auth);
-  gameState = inject(GameStateService); // Made public for template
-
-  currentUser = this.authService.currentUser;
-  score = this.gameState.score;
-  highScore = this.gameState.highScore;
-  attempts = this.gameState.attempts;
-  correctAnswers = this.gameState.correctAnswers;
-  wrongAnswers = this.gameState.wrongAnswers;
-
-  /**
-   * EVENT: Logout button click
-   * Resets game and logs out user
-   */
+  private auth = inject(Auth);
+  gameState = inject(GameStateService);
+  name = computed(() => this.auth.currentUser()?.username.split('@')[0] ?? 'Driver');
+  logoutError = signal('');
   onLogout(): void {
-    if (confirm('Are you sure you want to logout?')) {
-      this.gameState.resetGame();
-      this.authService.logout().subscribe({
-        next: () => console.log('Logged out successfully'),
-        error: (error) => console.error('Logout error:', error)
+    this.auth
+      .logout()
+      .subscribe({
+        next: () => this.gameState.clearSession(),
+        error: () => this.logoutError.set('Could not sign out. Try again.'),
       });
-    }
   }
-
-  /**
-   * EVENT: Reset button click
-   * Resets current score to 0 (keeps high score)
-   */
   onReset(): void {
-    if (confirm('Reset your current score to 0? (High score will be kept)')) {
-      this.gameState.resetGame();
-    }
+    if (confirm('Reset your current score to 0? Your best score and history will be kept.'))
+      void this.gameState.resetGame();
   }
 }

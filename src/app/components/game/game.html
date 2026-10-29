@@ -1,171 +1,98 @@
-<div class="container my-4">
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <div class="card game-glass shadow-sm p-4 animate-fade-in">
-        @if (!currentQuestion()) {
-          <div class="text-center py-5">
-            <h2 class="fw-bold mb-3 text-dark">Ready to Play?</h2>
-            <p class="text-muted fs-5 mb-4">
-              Click the button below to start solving math puzzles!
-            </p>
-
-            @if (gameState.isLoadingScore()) {
-              <div class="mb-3">
-                <span class="loading-orbit me-2" aria-hidden="true"></span>
-                <span class="text-muted">Loading your score...</span>
-              </div>
-            }
-
-            <button
-              (click)="loadQuestion()"
-              [disabled]="isLoading() || gameState.isLoadingScore()"
-              class="btn btn-warning btn-lg px-5 shadow-sm"
-            >
-              @if (isLoading()) {
-                <span class="spinner-border spinner-border-sm me-2"></span>
-                Loading...
-              } @else {
-                ▶️ Start Game
-              }
-            </button>
-          </div>
-        }
-
-        @if (currentQuestion()) {
-          <div class="question-content animate-fade-in" [class.is-loading]="isLoading()">
-            <h3 class="text-center fw-bold mb-4">Solve the Puzzle</h3>
-
-            <!-- Question Image -->
-            <div class="bg-light border rounded-3 p-4 mb-4 d-flex justify-content-center align-items-center" style="min-height: 300px;">
-              <img
-                [src]="currentQuestion()?.question"
-                alt="Math puzzle"
-                class="img-fluid rounded shadow-sm question-img"
-                style="max-height: 350px; max-width: 100%;"
-              />
-            </div>
-
-            @if (isLoading()) {
-              <div class="question-loading-glass" role="status" aria-live="polite">
-                <span class="loading-orbit loading-orbit-large" aria-hidden="true"></span>
-                <span>Loading your next puzzle...</span>
-              </div>
-            }
-
-            <div>
-              <label for="answer" class="form-label fw-semibold fs-5"
-              >What's your answer?</label
-              >
-              <input
-                id="answer"
-                type="number"
-                [value]="userAnswer()"
-                (input)="updateAnswer($any($event.target).value)"
-                (keypress)="onKeyPress($event)"
-                [disabled]="isLoading()"
-                placeholder="Enter a number"
-                class="form-control form-control-lg mb-3"
-                autofocus
-              />
-
-              <div class="d-flex gap-3">
-                <button
-                  (click)="submitAnswer()"
-                  [disabled]="isLoading() || !userAnswer()"
-                  class="btn btn-success btn-lg flex-fill py-3 fw-semibold shadow-sm"
-                >
-                  ✓ Submit Answer
-                </button>
-                <button
-                  (click)="skipQuestion()"
-                  [disabled]="isLoading()"
-                  class="btn btn-secondary btn-lg px-4 py-3 fw-semibold shadow-sm"
-                >
-                  ⏭️ Skip
-                </button>
-              </div>
-            </div>
-
-            @if (feedback()) {
-              <div
-                class="alert mt-4 animate-slide"
-                [class]="{
-                  'alert-success': feedbackType() === 'success',
-                  'alert-danger': feedbackType() === 'error'
-                }"
-                role="alert"
-              >
-                <div class="d-flex align-items-center">
-                  <span class="fs-4 me-2">
-                    @if (feedbackType() === 'success') {
-                      ✅
-                    } @else {
-                      ❌
-                    }
-                  </span>
-                  <span class="fs-5">{{ feedback() }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </div>
+<section class="challenge" aria-labelledby="challenge-title">
+  <p class="eyebrow">PIT WALL / ENGINEER RADIO</p>
+  <h2 id="challenge-title">Boost challenge</h2>
+  <p class="intro">Solve the Banana puzzle. Make your move.</p>
+  <div class="scoring">
+    <span>? BOOST <b>+10</b></span
+    ><span>? SLOWDOWN <b>?5</b></span>
+  </div>
+  @if (gameState.isLoadingScore()) {
+    <p role="status">Loading your saved race?</p>
+  }
+  @if (gameState.error()) {
+    <p class="error" role="alert">{{ gameState.error() }}</p>
+  }
+  @if (isLoading()) {
+    <div class="puzzle-placeholder" role="status">Receiving challenge?</div>
+  } @else if (currentQuestion(); as question) {
+    <div class="puzzle-image">
+      <img [src]="question.question" alt="Banana math puzzle: find the missing number" />
     </div>
-
-    <div class="col-lg-4">
-      @if (history().length > 0) {
-        <div class="card game-glass shadow-sm p-3 animate-fade-in sticky-top" style="top: 20px;">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-dark mb-0">Recent History</h4>
-            <span class="badge bg-primary rounded-pill">{{ history().length }}</span>
-          </div>
-
-          <div class="overflow-auto" style="max-height: 500px;">
-            @for (item of history().slice().reverse(); track item.timestamp) {
-              <div
-                class="history-glass border rounded-3 p-3 mb-2 animate-slide"
-                [class]="{
-                  'bg-success-subtle border-success': item.isCorrect,
-                  'bg-danger-subtle border-danger': !item.isCorrect
-                }"
-              >
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="flex-grow-1">
-                    <span class="text-dark">
-                      Your answer: <strong class="fs-5">{{ item.userAnswer }}</strong>
-                    </span>
-                    @if (!item.isCorrect) {
-                      <div class="text-muted small mt-1">
-                        Correct answer: <strong>{{ item.correctAnswer }}</strong>
-                      </div>
-                    }
-                  </div>
-                  <span class="fs-4 ms-2">
-                    @if (item.isCorrect) {
-                      ✅
-                    } @else {
-                      ❌
-                    }
-                  </span>
-                </div>
-              </div>
-            }
-          </div>
-
-          @if (history().length > 5) {
-            <button
-              (click)="clearHistory()"
-              class="btn btn-sm btn-outline-secondary mt-2 w-100"
-            >
-              🗑️ Clear History
-            </button>
-          }
+    <form (submit)="$event.preventDefault(); submitAnswer()">
+      <label for="boost-answer">Missing number</label>
+      <input
+        id="boost-answer"
+        type="number"
+        inputmode="numeric"
+        step="1"
+        autocomplete="off"
+        [value]="userAnswer()"
+        (input)="userAnswer.set($any($event.target).value)"
+        [disabled]="
+          answered() || gameState.saving() || gameState.isLoadingScore() || !!gameState.error()
+        "
+      />
+      <div class="challenge-actions">
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="
+            answered() ||
+            gameState.saving() ||
+            !userAnswer().trim() ||
+            gameState.isLoadingScore() ||
+            !!gameState.error()
+          "
+        >
+          {{ gameState.saving() ? 'Saving?' : 'Deploy boost ?' }}
+        </button>
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="loadQuestion()"
+          [disabled]="answered() || gameState.saving()"
+        >
+          Skip
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="puzzle-placeholder">
+      <span class="challenge-number">+10</span>
+      <p>Your next overtake starts here.</p>
+    </div>
+    <button
+      class="primary-button w-100"
+      (click)="loadQuestion()"
+      [disabled]="gameState.isLoadingScore() || !!gameState.error()"
+    >
+      Load challenge ?
+    </button>
+  }
+  <p class="feedback" [class.success]="feedbackType() === 'success'" role="status">
+    {{ feedback() }}
+  </p>
+  <details class="history">
+    <summary>
+      Challenge history <span>{{ gameState.history().length }}</span>
+    </summary>
+    <div class="history-list">
+      @for (item of gameState.history().slice().reverse(); track $index) {
+        <div class="history-entry">
+          <strong [class.success]="item.isCorrect">{{
+            item.isCorrect ? '+10 BOOST' : '?5 SLOWDOWN'
+          }}</strong>
+          <time>{{ item.timestamp | date: 'short' }}</time>
+          <p>Your answer: {{ item.userAnswer }} ? Correct: {{ item.correctAnswer }}</p>
         </div>
-      } @else if (currentQuestion()) {
-        <div class="card game-glass shadow-sm p-4 text-center text-muted animate-fade-in">
-          <p class="mb-0">🎯 Your game history will appear here</p>
-        </div>
+      } @empty {
+        <p>No challenges yet. Time to leave the pits.</p>
       }
     </div>
-  </div>
-</div>
+    @if (gameState.history().length) {
+      <button class="secondary-button" (click)="clearHistory()" [disabled]="gameState.saving()">
+        Clear history
+      </button>
+    }
+  </details>
+</section>

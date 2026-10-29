@@ -1,8 +1,12 @@
 <div class="login-container">
   <div class="login-card" [ngClass]="isRegisterMode() ? 'register-glow' : 'login-glow'">
     <div class="login-header">
-      <h1> Banana Math Game</h1>
-      <h5 class="font-monospace"><u><i>{{ isRegisterMode() ? 'Create your account' : 'Welcome back!' }}</i></u></h5>
+      <h1>Banana GP</h1>
+      <h5 class="font-monospace">
+        <u
+          ><i>{{ isRegisterMode() ? 'Create your account' : 'Welcome back!' }}</i></u
+        >
+      </h5>
     </div>
 
     <div class="login-form">
@@ -42,28 +46,20 @@
         class="btn btn-primary"
         [disabled]="isLoading()"
       >
-        {{ isLoading() ? 'Please wait...' : (isRegisterMode() ? 'Register' : 'Login') }}
+        {{ isLoading() ? 'Please wait...' : isRegisterMode() ? 'Register' : 'Login' }}
       </button>
 
-      <button
-        (click)="toggleMode()"
-        class="btn btn-secondary"
-        [disabled]="isLoading()"
-      >
+      <button (click)="toggleMode()" class="btn btn-secondary" [disabled]="isLoading()">
         {{ isRegisterMode() ? 'Already have an account? Login' : 'Need an account? Register' }}
       </button>
     </div>
 
     @if (errorMessage()) {
-      <div class="message error">
-        ❌ {{ errorMessage() }}
-      </div>
+      <div class="message error" role="alert">❌ {{ errorMessage() }}</div>
     }
 
     @if (successMessage()) {
-      <div class="message success">
-        ✅ {{ successMessage() }}
-      </div>
+      <div class="message success" role="status">✅ {{ successMessage() }}</div>
     }
   </div>
 </div>
