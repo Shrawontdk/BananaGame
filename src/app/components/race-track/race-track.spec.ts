@@ -45,12 +45,41 @@ describe('RaceTrack', () => {
     expect(root.querySelectorAll('ol li').length).toBe(20);
     expect(root.textContent).toContain('Your position: P12');
     expect(root.textContent).toContain('+4 more');
-    const own = root.querySelector('.driver.you');
+    const own = root.querySelector('.driver.you') as HTMLElement;
+    const carNodes = Array.from(root.querySelectorAll('.driver'));
+    const track = root.querySelector('.track')!;
+    const mutations = new MutationObserver(() => {});
+    mutations.observe(track, { childList: true });
+    // Establish the initial painted transform before delivering an overtake.
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+    const oldTransform = getComputedStyle(own).transform;
     entries.update((items) =>
       items.map((item) => (item.uid === 'u11' ? { ...item, score: 210 } : item)),
     );
     fixture.detectChanges();
     expect(root.querySelector('.driver.you')).toBe(own);
+    expect(Array.from(root.querySelectorAll('.driver'))).toEqual(carNodes);
+    expect(mutations.takeRecords()).toEqual([]);
+    mutations.disconnect();
+    expect(root.querySelector('ol li')?.textContent).toContain('Driver 11');
+    expect(own.style.zIndex).toBe('100');
+    expect(root.textContent).not.toContain('?');
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+      const glide = own
+        .getAnimations()
+        .find(
+          (animation) =>
+            animation instanceof CSSTransition && animation.transitionProperty === 'transform',
+        );
+      expect(glide).toBeDefined();
+      if (glide) await glide.finished;
+      expect(getComputedStyle(own).transform).not.toBe(oldTransform);
+    }
     expect(root.textContent).toContain('Your position: P1');
     expect(root.querySelector('.driver.you')?.classList.contains('back')).toBeFalse();
     root.style.display = 'block';

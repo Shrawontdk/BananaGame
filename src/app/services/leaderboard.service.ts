@@ -16,6 +16,7 @@ import { RaceEntry, rankDrivers, splitField } from './race-ranking';
 export class LeaderboardService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
+  private uid = computed(() => this.auth.currentUser()?.id);
   private browser = isPlatformBrowser(inject(PLATFORM_ID));
   private entries = signal<RaceEntry[]>([]);
   readonly ownEntry = signal<RaceEntry | null>(null);
@@ -24,14 +25,14 @@ export class LeaderboardService {
   readonly total = signal(0);
   readonly more = computed(() => Math.max(0, this.total() - 20));
   readonly drivers = computed(() => rankDrivers(this.entries()));
-  readonly field = computed(() => splitField(this.drivers(), this.auth.currentUser()?.id));
+  readonly field = computed(() => splitField(this.drivers(), this.uid()));
   readonly outsideField = computed(() => {
     const own = this.ownEntry();
     return own && !this.drivers().some((d) => d.uid === own.uid) ? own : null;
   });
   constructor() {
     effect((onCleanup) => {
-      const uid = this.auth.currentUser()?.id;
+      const uid = this.uid();
       this.entries.set([]);
       this.ownEntry.set(null);
       this.error.set('');
@@ -40,7 +41,11 @@ export class LeaderboardService {
       if (!this.browser || !uid) return;
       this.loading.set(true);
       let active = true;
+      let lastCountAt = -Infinity;
       const refreshCount = () => {
+        const now = Date.now();
+        if (!active || now - lastCountAt < 30_000) return;
+        lastCountAt = now;
         getCountFromServer(collection(this.firestore, 'leaderboard'))
           .then((count) => {
             if (active) this.total.set(count.data().count);
@@ -54,7 +59,9 @@ export class LeaderboardService {
       const stop = onSnapshot(
         query(collection(this.firestore, 'leaderboard'), orderBy('score', 'desc'), limit(20)),
         (snapshot) => {
-          this.entries.set(snapshot.docs.map((d) => this.toEntry(d.id, d.data())));
+          this.entries.set(
+            snapshot.docs.map((d) => this.toEntry(d.id, d.data({ serverTimestamps: 'estimate' }))),
+          );
           refreshCount();
           this.loading.set(false);
         },
@@ -68,7 +75,11 @@ export class LeaderboardService {
       const stopOwn = onSnapshot(
         doc(this.firestore, 'leaderboard/' + uid),
         (snapshot) => {
-          this.ownEntry.set(snapshot.exists() ? this.toEntry(uid, snapshot.data()) : null);
+          this.ownEntry.set(
+            snapshot.exists()
+              ? this.toEntry(uid, snapshot.data({ serverTimestamps: 'estimate' }))
+              : null,
+          );
         },
         () => this.error.set('Your live timing is unavailable. Please reconnect.'),
       );

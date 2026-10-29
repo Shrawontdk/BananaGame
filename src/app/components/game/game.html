@@ -3,17 +3,17 @@
   <h2 id="challenge-title">Boost challenge</h2>
   <p class="intro">Solve the Banana puzzle. Make your move.</p>
   <div class="scoring">
-    <span>? BOOST <b>+10</b></span
-    ><span>? SLOWDOWN <b>?5</b></span>
+    <span>&#9650; BOOST <b>+10</b></span
+    ><span>&#9660; SLOWDOWN <b>&minus;5</b></span>
   </div>
   @if (gameState.isLoadingScore()) {
-    <p role="status">Loading your saved race?</p>
+    <p role="status">Loading your saved race&hellip;</p>
   }
   @if (gameState.error()) {
     <p class="error" role="alert">{{ gameState.error() }}</p>
   }
   @if (isLoading()) {
-    <div class="puzzle-placeholder" role="status">Receiving challenge?</div>
+    <div class="puzzle-placeholder" role="status">Receiving challenge&hellip;</div>
   } @else if (currentQuestion(); as question) {
     <div class="puzzle-image">
       <img [src]="question.question" alt="Banana math puzzle: find the missing number" />
@@ -44,7 +44,11 @@
             !!gameState.error()
           "
         >
-          {{ gameState.saving() ? 'Saving?' : 'Deploy boost ?' }}
+          @if (gameState.saving()) {
+            Saving&hellip;
+          } @else {
+            Deploy boost &rarr;
+          }
         </button>
         <button
           type="button"
@@ -66,7 +70,7 @@
       (click)="loadQuestion()"
       [disabled]="gameState.isLoadingScore() || !!gameState.error()"
     >
-      Load challenge ?
+      Load challenge &rarr;
     </button>
   }
   <p class="feedback" [class.success]="feedbackType() === 'success'" role="status">
@@ -80,10 +84,10 @@
       @for (item of gameState.history().slice().reverse(); track $index) {
         <div class="history-entry">
           <strong [class.success]="item.isCorrect">{{
-            item.isCorrect ? '+10 BOOST' : '?5 SLOWDOWN'
+            item.isCorrect ? '+10 BOOST' : '-5 SLOWDOWN'
           }}</strong>
           <time>{{ item.timestamp | date: 'short' }}</time>
-          <p>Your answer: {{ item.userAnswer }} ? Correct: {{ item.correctAnswer }}</p>
+          <p>Your answer: {{ item.userAnswer }} &middot; Correct: {{ item.correctAnswer }}</p>
         </div>
       } @empty {
         <p>No challenges yet. Time to leave the pits.</p>

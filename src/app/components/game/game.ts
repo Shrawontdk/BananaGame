@@ -95,7 +95,7 @@ export class Game {
     this.feedback.set(
       correct
         ? 'BOOST! +10 points. Keep pushing.'
-        : 'Slowdown: ?5 points (minimum 0). The answer was ' + question.solution + '.',
+        : 'Slowdown: -5 points (minimum 0). The answer was ' + question.solution + '.',
     );
     this.nextTimer = setTimeout(() => this.loadQuestion(), 1800);
   }

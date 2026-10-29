@@ -16,6 +16,8 @@ export class RaceTrack {
   state = inject(GameStateService);
   user = inject(Auth).currentUser;
   color = driverColor;
+  // Keep DOM siblings in uid order; only their transform and stacking order follow rank.
+  cars = computed(() => [...this.board.drivers()].sort((a, b) => a.uid.localeCompare(b.uid)));
   height = computed(() => 660 + Math.ceil(this.board.field().back.length / 3) * 100);
   x(driver: RankedDriver): number {
     return driver.rank <= 5

@@ -9,11 +9,11 @@
     </div>
   </div>
   <div class="timing-strip">
-    <span>FRONT PACK <b>01 ? 05</b></span
-    ><span>RACE TO THE TOP ?</span>
+    <span>FRONT PACK <b>01 &ndash; 05</b></span
+    ><span>RACE TO THE TOP &rarr;</span>
   </div>
   @if (board.loading()) {
-    <p role="status" class="notice">Connecting to live timing?</p>
+    <p role="status" class="notice">Connecting to live timing&hellip;</p>
   }
   @if (board.error()) {
     <p role="alert" class="notice error">{{ board.error() }}</p>
@@ -33,10 +33,11 @@
       @for (lane of [0, 1, 2, 3, 4]; track lane) {
         <div class="lane" [style.top.px]="lane * 120"></div>
       }
-      <div class="back-heading">BACK PACK <span>06 ? 20</span></div>
-      @for (driver of board.drivers(); track driver.uid) {
+      <div class="back-heading">BACK PACK <span>06 &ndash; 20</span></div>
+      @for (driver of cars(); track driver.uid) {
         <div
           class="driver"
+          [style.z-index]="driver.uid === user()?.id ? 100 : 21 - driver.rank"
           [class.back]="driver.rank > 5"
           [class.you]="driver.uid === user()?.id"
           [style.transform]="'translate(' + x(driver) + 'px,' + y(driver) + 'px)'"
@@ -83,7 +84,7 @@
     @if (board.more() > 0) {
       <span class="more-chip">+{{ board.more() }} more</span>
     }
-    <span>Top 20 live ? ties: earlier score first</span>
+    <span>Top 20 live &middot; ties: earlier score first</span>
   </div>
   @if (board.outsideField(); as own) {
     <div class="outside-car">
@@ -96,8 +97,8 @@
         />
       </div>
       <span
-        ><strong>YOU ? {{ own.displayName }}</strong
-        ><br />Your position: outside the displayed top 20 ? {{ own.score }} pts</span
+        ><strong>YOU &middot; {{ own.displayName }}</strong
+        ><br />Your position: outside the displayed top 20 &middot; {{ own.score }} pts</span
       >
     </div>
   }

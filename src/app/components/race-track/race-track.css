@@ -82,6 +82,7 @@ h2 {
   border-left: 5px solid #e14b4b;
   border-right: 5px solid #e14b4b;
   margin: 16px 0;
+  transition: height 400ms ease;
 }
 .lane {
   position: absolute;
@@ -118,7 +119,7 @@ h2 {
   transition:
     transform 800ms cubic-bezier(0.22, 0.8, 0.25, 1),
     opacity 600ms;
-  z-index: 1;
+  will-change: transform;
 }
 .driver-label {
   display: flex;
@@ -160,9 +161,6 @@ h2 {
 }
 .you .name {
   color: #e5ff76;
-}
-.you {
-  z-index: 2;
 }
 .car-motion {
   width: max-content;
@@ -215,8 +213,11 @@ h2 {
 .boost {
   animation: boost 1s ease-out;
 }
-.boost:before {
+.boost::before {
   content: '';
+  pointer-events: none;
+  opacity: 0;
+  animation: boost-glow 1s ease-out;
   position: absolute;
   right: 95%;
   top: 20px;
@@ -264,10 +265,19 @@ h2 {
 @keyframes boost {
   25% {
     transform: translateX(16px);
-    filter: drop-shadow(0 0 9px #e5ff76);
+    opacity: 0.85;
   }
   100% {
     transform: translateX(0);
+  }
+}
+@keyframes boost-glow {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
   }
 }
 @keyframes slowdown {
@@ -298,5 +308,20 @@ h2 {
   }
   .outside-car {
     flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .driver {
+    transition: none;
+  }
+  .driver {
+    will-change: auto;
+  }
+  .boost,
+  .slowdown,
+  .boost::before {
+    animation: none;
   }
 }
