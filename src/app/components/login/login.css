@@ -60,19 +60,19 @@
   filter: drop-shadow(0 10px 18px #0008);
 }
 .car-one {
-  top: 24%;
-  left: 7%;
-  transform: rotate(-12deg);
+  top: 53%;
+  left: 25%;
+  transform: translate(-50%, -50%) rotate(-56deg);
 }
 .car-two {
-  top: 48%;
-  right: 6%;
-  transform: rotate(9deg);
+  top: 47%;
+  right: 25%;
+  transform: translate(50%, -50%) rotate(124deg);
 }
 .car-three {
-  bottom: 10%;
-  left: 4%;
-  transform: rotate(7deg);
+  top: 79%;
+  left: 25%;
+  transform: translate(-50%, -50%) rotate(-160deg);
 }
 .track-light {
   width: 10px;
@@ -302,17 +302,14 @@
     right: 7%;
   }
   .car-one {
-    top: 13%;
-    left: -26px;
-    transform: scale(0.7) rotate(-12deg);
-    transform-origin: left center;
+    top: 39%;
+    left: 4%;
+    transform: translate(-50%, -50%) scale(0.48) rotate(-56deg);
   }
   .car-two {
-    top: auto;
-    right: -24px;
-    bottom: 11%;
-    transform: scale(0.7) rotate(9deg);
-    transform-origin: right center;
+    top: 62%;
+    right: 4%;
+    transform: translate(50%, -50%) scale(0.48) rotate(124deg);
   }
   .car-three {
     display: none;
